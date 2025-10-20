@@ -403,7 +403,7 @@ git branch -m "$PT_control_repo_branch" production
 ```puppet
 # @param message the string we want to paste to STDOUT
 plan test::foo (
-  String[1] $message = 'Hi CfgMgmtCamp!',
+  String[1] $message = 'Hi Puppet.Run 2025!',
 ) {
   out::message($message)
   run_task('puppet_agent::install', get_targets('all'))
@@ -523,6 +523,8 @@ count: false
 * There are subtle differences between `Bolt plans` and `Plans in PE`
 
   * `Plans in PE` have less features?! https://www.puppet.com/docs/pe/2025.0/plans_limitations.html
+
+  * There are plans to fix this in the future
 ]
 
 [![company-logo](logo-1181x1181.png)](https://www.betadots.de)
@@ -1079,7 +1081,7 @@ What's in the tarball?
 
 * Free to download for everybody
 
-* for example `puppet-enterprise-2021.7.8-el-8-x86_64.tar.gz`
+* for example `puppet-enterprise-2023.8.6-el-9-x86_64.tar.gz`
 
   * PE version specific
 
@@ -1108,7 +1110,7 @@ What's in the tarball?
 
 * Free to download for everybody
 
-* for example `puppet-enterprise-2021.7.8-el-8-x86_64.tar.gz`
+* for example `puppet-enterprise-2023.8.6-el-9-x86_64.tar.gz`
 
   * PE version specific
 
@@ -1139,7 +1141,7 @@ What's in the tarball?
 
 * Free to download for everybody
 
-* for example `puppet-enterprise-2021.7.8-el-8-x86_64.tar.gz`
+* for example `puppet-enterprise-2023.8.6-el-9-x86_64.tar.gz`
 
   * PE version specific
 
@@ -1172,7 +1174,7 @@ What's in the tarball?
 
 * Free to download for everybody
 
-* for example `puppet-enterprise-2021.7.8-el-8-x86_64.tar.gz`
+* for example `puppet-enterprise-2023.8.6-el-9-x86_64.tar.gz`
 
   * PE version specific
 
