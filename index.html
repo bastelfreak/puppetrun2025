@@ -1,0 +1,2848 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Doing mass Puppet Enterprise upgrades in highly restricted environments</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style type="text/css">
+      @font-face {
+        font-family: "Yanone Kaffeesatz";
+        font-style: normal;
+        font-weight: 400;
+        src: local("Yanone Kaffeesatz Regular"),
+          local("YanoneKaffeesatz-Regular"),
+          url(YDAoLskQQ5MOAgvHUQCcLbvy90DtE_Pg_qiF9bHvTzw.ttf)
+            format("truetype");
+      }
+      @font-face {
+        font-family: "Ubuntu Mono";
+        font-style: normal;
+        font-weight: 400;
+        src: local("Ubuntu Mono Regular"), local("UbuntuMono-Regular"),
+          url(ViZhet7Ak-LRXZMXzuAfkZ0EAVxt0G0biEntp43Qt6E.ttf)
+            format("truetype");
+      }
+      @font-face {
+        font-family: "Droid Serif";
+        font-style: normal;
+        font-weight: 400;
+        src: local("Droid Serif Regular"), local("DroidSerif-Regular"),
+          url(0AKsP294HTD-nvJgucYTaJ0EAVxt0G0biEntp43Qt6E.ttf)
+            format("truetype");
+      }
+      @font-face {
+        font-family: "Nunito Sans";
+        font-style: normal;
+        font-weight: 400;
+        src: local("Nunito Sans Regular"), local("NunitoSans-Regular"),
+          url(NunitoSans-Regular.ttf)
+            format("truetype");
+      }
+      body {
+        font-family: "Nunito Sans";
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Yanone Kaffeesatz";
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content {
+        background-image: url(blue-skies.jpg);
+        background-size: cover;
+      }
+      .remark-slide-content h1 {
+        font-size: 3em;
+      }
+      .remark-slide-content h2 {
+        font-size: 2em;
+      }
+      .remark-slide-content h3 {
+        font-size: 1.6em;
+      }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      li p {
+        line-height: 1.25em;
+      }
+      .red {
+        color: #fa0000;
+      }
+      .large {
+        font-size: 2em;
+      }
+      a,
+      a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        -moz-border-radius: 5px;
+        -web-border-radius: 5px;
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code,
+      .remark-inline-code {
+        font-family: "Ubuntu Mono";
+      }
+      .remark-code-line-highlighted {
+        background-color: #373832;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverseold {
+        background: #09194F;
+        background-image: url(dots.png), url(BD_Wortmarke_weiss.png);
+        background-repeat: no-repeat;
+        background-position: top 12px left 20px, top 12px right 20px;
+        background-size: 30%, 10%;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverseold h1{
+        color: #f3f3f3;
+        line-height: 1.2em;
+      }
+      .inverseold h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+      .inverse, .inversedoubleheading {
+        background: #09194F;
+        background-image: url(dots.png), url(BD_Wortmarke_weiss.png), url(circle.png);
+        background-repeat: no-repeat;
+        background-position: top 12px left 20px, top 12px right 20px, center center;
+        background-size: 30%, 10%, 50%;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1,
+      .inverse h2,
+      .inversedoubleheading h1,
+      .inversedoubleheading h2 {
+        color: #f3f3f3;
+      }
+      .inverse h2 {
+        line-height: 0.8em;
+        margin-top: 0.8em;
+      }
+      .inverse h1 {
+        margin-top: 0em;
+        line-height: 1.1em;
+      }
+      .inversedoubleheading h1 {
+        margin-top: -1em;
+        line-height: 1.1em;
+      }
+      .inversedoubleheading h2 {
+        line-height: 0.8em;
+        margin-top: 0.8em;
+      }
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top: 151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first,
+      #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+      /* Two-column layout */
+      .puppetlogo img {
+        width: 95%;
+      }
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+      .left-column h2:last-of-type,
+      .left-column h3:last-child {
+        color: #000;
+      }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+      .right-column .something img {
+        width: 100%;
+        height: 550px;
+      }
+      .right-column .smallimg img {
+        width: 90%;
+      }
+      .right-column .nowidth img {
+        width: auto;
+      }
+      .right-column-center {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+        text-align: center;
+      }
+      .right-column img {
+        width: 100%;
+      }
+      @page {
+        size: 1920px 1080px;
+        margin: 0;
+      }
+      @media print {
+        .remark-slide-scaler {
+          width: 100% !important;
+          height: 100% !important;
+          transform: scale(1) !important;
+          top: 0 !important;
+          left: 0 !important;
+          size: 1920px 1080px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse
+
+# Doing mass PE upgrades in<br/>highly restricted environments
+
+???
+
+---
+
+## $ whoami
+<img src="bastelfreak2.jpg" alt="drawing" style="float: right;width: 400px;"/>
+
+* Tim 'bastelfreak' Meusel
+
+* Puppet Contributor since 2012
+
+* Merging stuff on [Vox Pupuli](https://voxpupuli.org/) (Puppet Community) since 2015
+
+* Vox Pupuli Project Management Committee member
+
+* Senior IT Automation Consultant at [betadots](https://betadots.de/)
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+???
+
+* who has seen this picture before because I reviewed/merged your pull request?
+
+---
+
+class: center, middle, inverse
+
+# Bolt
+
+## Tasks & Plans
+
+???
+
+* Who knows bolt?
+---
+
+.left-column[
+## Bolt
+### Tasks?!
+]
+
+.right-column[
+* Runs tasks via ssh or WinRM on remote systems
+
+  * CLI only
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* So what's a task?
+---
+
+count: false
+
+.left-column[
+## Bolt
+### Tasks?!
+]
+
+.right-column[
+* Runs tasks via ssh or WinRM on remote systems
+
+  * CLI only
+
+* A task is a executable binary/script + json file
+
+```json
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Rename branch",
+  "parameters": {
+    "control_repo_branch": {
+      "description": "Control-repo branch",
+      "type": "String"
+    }
+  }
+}
+```
+
+```sh
+#!/bin/bash
+
+pushd /tmp/control-repo || exit
+git branch -m production old_prod
+git branch -m "$PT_control_repo_branch" production
+```
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## Bolt
+### Tasks?!
+]
+
+.right-column[
+* Runs tasks via ssh or WinRM on remote systems
+
+  * CLI only
+
+* A task is a executable binary/script + json file
+
+* Input and output of each task is JSON
+
+  * makes parsing, scripting and concatenating easy
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## Bolt
+### Tasks?!
+### Plans?!
+]
+
+.right-column[
+* Bolt Plans are written in Puppet DSL (or [YAML](https://www.puppet.com/docs/bolt/latest/writing_yaml_plans.html))
+
+* Plans apply puppet code, execute Bolt or Puppet functions, start tasks or other plans
+
+```puppet
+# @param message the string we want to paste to STDOUT
+plan test::foo (
+  String[1] $message = 'Hi CfgMgmtCamp!',
+) {
+  out::message($message)
+  run_task('puppet_agent::install', get_targets('all'))
+}
+```
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* plans and tasks are organized in modules
+* plans are parsed top to bottom
+* there's a config file with all nodes + credentials
+
+* you can do a bunch of error checking and retrying!
+
+---
+
+class: center, middle, inverseold
+
+# Bolt is the missing part in the ecosystem for imperative workflows and orchestration
+
+## It combines scripts and Puppet code
+
+???
+
+* bolt has more features, please check them out
+* but this isn't a bolt talk, just an intro
+---
+class: center, middle, inverse
+
+# Puppet<br/>Enterprise
+
+???
+
+---
+
+.left-column[
+## PE
+### What?
+]
+
+.right-column[
+.smallimg[![firewall](firewall_standard.png)]
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* TCP port 8170 API to trigger r10k/deploy code
+---
+
+.left-column[
+## PE
+### What?
+]
+
+.right-column[
+![firewall](orchestrator.drawio.svg)
+
+* Orchestrator can run Puppet tasks and Plans
+
+* Basically an API & Web UI for bolt
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* PE Console is a web UI
+---
+
+.left-column[
+## PE
+### What?
+### Puppet Plans
+]
+
+.right-column[
+* What are Puppet tasks & Plans?
+
+* Like bolt task & Plans
+
+* Use the PXP agent as transport
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### What?
+### Puppet Plans
+]
+
+.right-column[
+* What are Puppet tasks & Plans?
+
+* Like bolt task & Plans
+
+* Use the PXP agent as transport
+
+* Orchestrator is closed source, PXP agent is open source
+
+* There are subtle differences between `Bolt plans` and `Plans in PE`
+
+  * `Plans in PE` have less features?! https://www.puppet.com/docs/pe/2025.0/plans_limitations.html
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+class: center, middle, inverse
+
+# PE in highly<br/> restricted environments
+<br/>
+## A user story
+
+???
+
+---
+.left-column[
+## PE
+### Setup
+]
+
+.right-column[
+* An organisation with many regulations and restrictions
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Assume government org, a company that deals with healthcare data or credit card information
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+]
+
+.right-column[
+* An organisation with many regulations and restrictions
+
+* Runs 3000 different services
+
+Each service:
+
+  * consists of a couple of virtual machines
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+]
+
+.right-column[
+* An organisation with many regulations and restrictions
+
+* Runs 3000 different services
+
+Each service:
+
+  * consists of a couple of virtual machines
+
+  * needs to be isolated from each other
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* The services are independant from each other
+
+* they are just running in the same datacenter / vmware cluster
+---
+count: false
+
+.left-column[
+## PE
+### Setup
+]
+
+.right-column[
+* An organisation with many regulations and restrictions
+
+* Runs 3000 different services
+
+Each service:
+
+  * consists of a couple of virtual machines
+
+  * needs to be isolated from each other
+
+  * has to be managed by Puppet
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+]
+
+.right-column[
+
+![3000 primaries](setup.drawio.svg)
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+]
+
+.right-column[
+
+* 1 central GitLab
+
+  * contains all puppet modules
+
+  * contains 3000 control repos
+
+* 3000 individual primaries
+
+* 5-40 agents per primary
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* so each service has one VM with a primary
+* in theory never a compiler, no dedicated puppetdb, no replica
+* I don't know how other admins design their service
+* I know the PE version that was initially provisioned, I don't know if users touched it
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+]
+
+.right-column[
+
+"security" constraints:
+
+* No ssh access to a service
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* If there's a downtime, a person with four-eye-principle can get ssh access via jump host
+* The "no-ssh" rule is newish, in the past people modified their services by hand
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+]
+
+.right-column[
+
+"security" constraints:
+
+* No ssh access to a service
+
+  * The PE APIs are available
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+]
+
+.right-column[
+
+"security" constraints:
+
+* No ssh access to a service
+
+  * The PE APIs are available
+
+* No code changes for running services allowed
+
+  * Architects wanted "immutable" services
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* When you want to deploy code changes, you need to spin up the same service again and delete the old instance
+
+* every "service type" has it's own control-repo. each deployed service gets its own branch in the control-repo
+
+* this means that no agent is running in a "production" env, but something else
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+]
+
+.right-column[
+
+"security" constraints:
+
+* No ssh access to a service
+
+  * The PE APIs are available
+
+* No code changes for running services allowed
+
+  * Architects wanted "immutable" services
+
+* Of course no internet access
+
+  * Everything needs to be mirrored internally
+
+  * No HTTP proxy available
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* All of this was built over 6? years, I joined the project last year
+---
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+]
+
+.right-column[
+
+* Update 3000 PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+]
+
+.right-column[
+
+* Update 3000 PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
+
+* Don't use ssh
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+]
+
+.right-column[
+
+* Update 3000 PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
+
+* Don't use ssh
+
+* Fully automated
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* "start the upgrade once, then just wait"
+---
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+]
+
+.right-column[
+
+* Update 3000 PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
+
+* Don't use ssh
+
+* Fully automated
+
+* Please don't break anything
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+]
+
+.right-column[
+
+* I mentioned this to Perforce employees
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* We had a discussion in the public slack and were brainstorming a bit
+* IRC and slack channels are always great to exchange ideas and discuss issues
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+]
+
+.right-column[
+
+* I mentioned this to Perforce employees
+
+* Perforce reached out to me for a collaboration
+
+The idea:
+
+* I implement the upgrade somehow
+
+* Perforce assists, helps to review PRs quickly
+
+* Perforce can publish a whitepaper
+
+* We publish the code as open source
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+]
+
+.right-column[
+
+* I mentioned this to Perforce employees
+
+* Perforce reached out to me for a collaboration
+
+The idea:
+
+* I implement the upgrade somehow
+
+* Perforce assists, helps to review PRs quickly
+
+* Perforce can publish a whitepaper
+
+* We publish the code as open source
+
+* Perforce stopped responding to all emails
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* I asked a lot of people, multiple times, no responsive
+
+* I don't know why
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+How you are supposed to Upgrade PE
+
+![upgrade docs wo PIM](2025-01-29_14-31.png)
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+How you are supposed to Upgrade PE
+
+![upgrade docs wo PIM](2025-01-29_14-31.png)
+
+* TL;DR: "ssh to the Primary and download a tarball"
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* This was the default for years
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+What's in the tarball?
+
+* Free to download for everybody
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+What's in the tarball?
+
+* Free to download for everybody
+
+* for example `puppet-enterprise-2021.7.8-el-8-x86_64.tar.gz`
+
+  * PE version specific
+
+  * OS specific
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+What's in the tarball?
+
+* Free to download for everybody
+
+* for example `puppet-enterprise-2021.7.8-el-8-x86_64.tar.gz`
+
+  * PE version specific
+
+  * OS specific
+
+* contains a yum repo with some rpms and a long bash script
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+What's in the tarball?
+
+* Free to download for everybody
+
+* for example `puppet-enterprise-2021.7.8-el-8-x86_64.tar.gz`
+
+  * PE version specific
+
+  * OS specific
+
+* contains a yum repo with some rpms and a long bash script
+
+* one package contains puppet modules
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+What's in the tarball?
+
+* Free to download for everybody
+
+* for example `puppet-enterprise-2021.7.8-el-8-x86_64.tar.gz`
+
+  * PE version specific
+
+  * OS specific
+
+* contains a yum repo with some rpms and a long bash script
+
+* one package contains puppet modules
+
+* bash script install the rpms & runs puppet apply
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+
+* License prohibits putting the puppet modules into my GitLab
+
+* License prohibits putting the rpms on my local mirror
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* This would have allowed me to make the upgrade without the installer
+
+* We reached out to perforce, they said "nope"
+
+* Are there other ways?
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+
+* License prohibits putting the puppet modules into my GitLab
+
+* License prohibits putting the rpms on my local mirror
+
+* With the rpms, the upgrade would be so much easier to automate
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* We could have developed a generic plan that does OS patches and include the PE rpms
+
+* Perforce management is so reluctant and stubborn
+
+---
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+![upgrade w PIM](2025-01-29_15-35.png)
+
+* https://www.puppet.com/docs/pe/latest/upgrading_pe.html
+
+* PIM is a frontend around Bolt & [puppetlabs-peadm](https://github.com/puppetlabs/puppetlabs-peadm)
+
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+* PIM is a frontend around Bolt & [puppetlabs-peadm](https://github.com/puppetlabs/puppetlabs-peadm)
+
+* PEADM: A module with tasks and plans to install/modify/upgrade PE
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+* PIM is a frontend around Bolt & [puppetlabs-peadm](https://github.com/puppetlabs/puppetlabs-peadm)
+
+* PEADM: A module with tasks and plans to install/modify/upgrade PE
+
+* PEADM wraps the original installer tarball
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+]
+
+.right-column[
+* PIM is a frontend around Bolt & [puppetlabs-peadm](https://github.com/puppetlabs/puppetlabs-peadm)
+
+* PEADM: A module with tasks and plans to install/modify/upgrade PE
+
+* PEADM wraps the original installer tarball
+
+* PEADM is compatible with PE 2019.8.1 and newer
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+![installer.drawio.svg](installer.drawio.svg)
+
+* We cannot run the installer directly, because we don't have ssh access
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* We canot ssh into a service and run the installer
+
+* we don't have ssh access
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+* The Orchestrator has an API to start plans
+
+* Can it upgrade itself?
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* How can we do the upgrade?!
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+* The Orchestrator has an API to start plans
+
+* Can it upgrade itself?
+
+  * No
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+* The Orchestrator has an API to start plans
+
+* Can it upgrade itself?
+
+  * No
+
+  * orchestrator rpm needs to be upgraded and service needs to be restarted
+
+  * This will deadlock or abort the PEADM plan
+
+![simpleupgrade.drawio.svg](simpleupgrade.drawio.svg)
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+* The module [puppetlabs/service](https://forge.puppet.com/modules/puppetlabs/service/readme) has tasks to start/stop/inspect a service
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+* The module [puppetlabs/service](https://forge.puppet.com/modules/puppetlabs/service/readme) has tasks to start/stop/inspect a service
+
+* We could write a systemd unit that starts bolt with `Type=exec`
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+* The module [puppetlabs/service](https://forge.puppet.com/modules/puppetlabs/service/readme) has tasks to start/stop/inspect a service
+
+* We could write a systemd unit that starts bolt with `Type=exec`
+
+  * Then systemd will run bolt in the background (asynchronously)
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+* The module [puppetlabs/service](https://forge.puppet.com/modules/puppetlabs/service/readme) has tasks to start/stop/inspect a service
+
+* We could write a systemd unit that starts bolt with `Type=exec`
+
+  * Then systemd will run bolt in the background (asynchronously)
+
+```
+# /etc/systemd/system/peadmmig@.service
+# THIS FILE IS MANAGED BY PUPPET
+[Unit]
+Description=run bolt plans in project peadmmig
+
+[Service]
+Type=exec
+ExecStart=/opt/puppetlabs/bin/bolt plan run %i --params @/opt/peadmmig/%i.json
+User=peadmmig
+Group=peadmmig
+WorkingDirectory=/opt/peadmmig
+# don't add RemainAfterExit,
+# then we cannot track the state via puppet anymore after bolt started
+```
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+* A [template service unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html) contains a single `@` and accepts strings afterwards
+
+* This allows us to pass plan names to our unit
+
+* `systemctl {status,start} peadmmig@profiles::convert.service`
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* We can check if a plan is running
+
+* we can start a plan
+
+* We can then check if a plan is still running or failed or was successful
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+* A [template service unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html) contains a single `@` and accepts strings afterwards
+
+* This allows us to pass plan names to our unit
+
+* `systemctl {status,start} peadmmig@profiles::convert.service`
+
+* PE doesn't have bolt installed by default
+
+* In [May 2024](https://github.com/puppetlabs/puppet-enterprise_issues/issues/34) we asked if PE could provide bolt by default
+
+  * Still no response. It was promised multiple times that someone will take a look at the issue
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* imporant wording: they promised that the product manager will take a look at the request. They didn't promise to implement it.
+
+* And they didn't even look (or if they did, they didn't communicate it)
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+* A [template service unit](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html) contains a single `@` and accepts strings afterwards
+
+* This allows us to pass plan names to our unit
+
+* `systemctl {status,start} peadmmig@profiles::convert.service`
+
+* PE doesn't have bolt installed by default
+
+* In [May 2024](https://github.com/puppetlabs/puppet-enterprise_issues/issues/34) we asked if PE could provide bolt by default
+
+  * Still no response. It was promised multiple times that someone will take a look at the issue
+
+* Vox Pupuli now has a module to install bolt: [forge.puppet/com/puppet/bolt](https://forge.puppet.com/modules/puppet/bolt/readme)
+
+  * The module can create the systemd template service unit + all required configuration files
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+![complicatedupgrade.drawio.svg](complicatedupgrade.drawio.svg)
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+]
+
+.right-column[
+
+![complicatedupgrade.drawio.svg](complicatedupgrade.drawio.svg)
+
+* During development, this worked surprisingly well
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Is that insane or smart? I don't know
+
+* bolt is executed by systemd
+
+* bolt can restart all PE related services without issues
+
+* PE Orchestrator only needs to be available to initially start bolt, or when I want to query the status
+
+* All bolt stuff will be logged into systemd journal
+
+* we hacked this together by hand on a few test environments and it kinda worked. some obstacles
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+]
+
+.right-column[
+
+* We need our own plan that does some sanity/health checks
+
+  * If everything is fine, our plan starts the peadm::upgrade plan
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* PEADM basically assumes that you run it in a healthy environment
+
+* I don't know the services
+
+* PEADM identifies nodes by checking information in the TLS certificate. eg compiler, primary
+
+* This information only exists if you installed your environment with PEADM.
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+]
+
+.right-column[
+
+* We need our own plan that does some sanity/health checks
+
+  * If everything is fine, our plan starts the peadm::upgrade plan
+
+![morecomplicatedupgrade.drawio.svg](morecomplicatedupgrade.drawio.svg)
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* PEADM basically assumes that you run it in a healthy environment
+
+* I don't know the services
+
+* PEADM identifies nodes by checking information in the TLS certificate. eg compiler, primary
+
+* This information only exists if you installed your environment with PEADM.
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+]
+
+.right-column[
+
+* We need to run peadm::convert before peadm::upgrade
+
+  * This will replace the TLS certificate on your primary
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* peadm::convert will replace TLS certificates for your primary
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+]
+
+.right-column[
+
+* We need to run peadm::convert before peadm::upgrade
+
+  * This will replace the TLS certificate on your primary
+
+* We need to deploy our own plans, but code deployments aren't allowed
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* as mentioned earlier, code deployments are not allowed
+
+* we did some argumentation with the architects
+
+
+---
+
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+]
+
+.right-column[
+
+* We need to run peadm::convert before peadm::upgrade
+
+  * This will replace the TLS certificate on your primary
+
+* We need to deploy our own plans, but code deployments aren't allowed
+
+* "No code deployments that might impact normal puppet agent operations"
+
+* PE supports multiple control repositories
+
+  * We can add another control repo, that only contains tasks/plan/modules for PE upgrades
+
+  * No agent will make a puppet run in this environment
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* PE has two ways to specify a control repo:
+
+* A single control repo
+
+```yaml
+puppet_enterprise::profile::master::r10k_remote: 'https://github.com/testcontrolrepo.git'
+```
+
+* N control repos
+
+```yaml
+puppet_enterprise::master::code_manager::sources:
+  foo:
+    remote: 'https://github.com/bastelfreak/testcontrolrepo.git'
+    prefix: false
+  baz:
+    remote: 'https://github.com/voxpupuli/controlrepo'
+    prefix: true
+```
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* You should not specify both Hiera Keys
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* technically it's possible. which is good. So we can start with a setup that has the r10k_remote option and update it inplace to the hash
+* It confuses admins because they assume only one option is set.
+
+* there are multiple places where you can configure it, not every place is lookup up always, which can lead to config flips
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* You should not specify both Hiera Keys
+
+* PE Installer takes a config file ([pe.conf](https://www.puppet.com/docs/pe/latest/config_intro.html#configure-settings-peconf)) that accepts Hiera keys
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* of course that was used for many services when they were provisioned
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* You should not specify both Hiera Keys
+
+* PE Installer takes a config file ([pe.conf](https://www.puppet.com/docs/pe/latest/config_intro.html#configure-settings-peconf)) that accepts Hiera keys
+
+* PE Console can also serve Hiera data
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* And during installation, data from the pe.conf is added to the PE Console
+* so we need to clean it up in multiple places
+
+* This cannot be disabled. I'm not aware of any PE installation that benefits from this "feature"
+
+* Again we asked roughly a year ago to make it optional to to remove this feature, not a single response
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* You should not specify both Hiera Keys
+
+* PE Installer takes a config file ([pe.conf](https://www.puppet.com/docs/pe/latest/config_intro.html#configure-settings-peconf)) that accepts Hiera keys
+
+* PE Console can also serve Hiera data
+
+* A cronjob dumps PE Console data to disk (user_data.conf)
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* During a upgrade, the agent does a puppet run/apply with just this Hiera data, without your usual code
+
+* this makes it important to cleanup leftovers
+
+* In the puppet ecosystem, which file format would you expect if you store hiera keys?
+
+* Those files are in hocon.
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* You should not specify both Hiera Keys
+
+* PE Installer takes a config file ([pe.conf](https://www.puppet.com/docs/pe/latest/config_intro.html#configure-settings-peconf)) that accepts Hiera keys
+
+* PE Console can also serve Hiera data
+
+* A cronjob dumps PE Console data to disk (user_data.conf)
+
+* pe.conf and user_data.conf use HOCON format
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Would you expect that Puppet core or stdlib have a function to write HOCON?
+---
+
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* You should not specify both Hiera Keys
+
+* PE Installer takes a config file ([pe.conf](https://www.puppet.com/docs/pe/latest/config_intro.html#configure-settings-peconf)) that accepts Hiera keys
+
+* PE Console can also serve Hiera data
+
+* A cronjob dumps PE Console data to disk (user_data.conf)
+
+* pe.conf and user_data.conf use HOCON format
+
+* Puppet core/stdlib have no function to write HOCON
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* There's a function to parse HOCON
+
+* As a hack we can stdlib::to_json_pretty() function
+
+* the files can contain comments, they will be deleted
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Every deployed service has their own control repo branch
+
+  * No agents runs in a production environment
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* This is totally fine, puppet agent works
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Every deployed service has their own control repo branch
+
+  * No agents runs in a production environment
+
+* PE Console in some versions requires a production environment to interact with plans
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* This is fixed in recent versions, I don't know anymore when it was fixed
+* This was only relevant for the UI, not for the API, so it didn't effect us
+* We used the UI during tests
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Every deployed service has their own control repo branch
+
+  * No agents runs in a production environment
+
+* PE Console in some versions requires a production environment to interact with plans
+
+* PEADM assumes that a production branch exists
+
+  * This isn't listed as a requirement anywhere
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Every deployed service has their own control repo branch
+
+  * No agents runs in a production environment
+
+* PE Console in some versions requires a production environment to interact with plans
+
+* PEADM assumes that a production branch exists
+
+  * This isn't listed as a requirement anywhere
+
+  * We reported this in July 2024
+
+  * This was a blocker for the biggest PE customer I ever met
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Every deployed service has their own control repo branch
+
+  * No agents runs in a production environment
+
+* PE Console in some versions requires a production environment to interact with plans
+
+* PEADM assumes that a production branch exists
+
+  * This isn't listed as a requirement anywhere
+
+  * We reported this in July 2024
+
+  * This was a blocker for the biggest PE customer I ever met
+
+  * We did our own debugging and proposed a fix in August 2024
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Every deployed service has their own control repo branch
+
+  * No agents runs in a production environment
+
+* PE Console in some versions requires a production environment to interact with plans
+
+* PEADM assumes that a production branch exists
+
+  * This isn't listed as a requirement anywhere
+
+  * We reported this in July 2024
+
+  * This was a blocker for the biggest PE customer I ever met
+
+  * We did our own debugging and proposed a fix in August 2024
+
+  * This is still not released, Engineering and product owner ignore all slack/email messages
+
+  * We had escalation meetings with our sales rep and some engineers in September
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Also they are not directly reachable via a support ticket
+* I don't know for sure who is actually responsible
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Required Hiera keys when the Primary isn't running in production
+
+```yaml
+pe_install::install::classification::pe_node_group_environment: 'foo'
+puppet_enterprise::master::recover_configuration::pe_environment: 'foo'
+```
+
+  * Only required for inplace updates
+
+  * [puppet.com/docs/pe/latest/upgrading_pe.html](https://www.puppet.com/docs/pe/latest/upgrading_pe.html#update_environment)
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* Customer made a mistake, PE requires you to set those two keys to the environment name that the primary uses
+
+* this is documented
+
+* customer never did inplace updates before and never read the upgrade docs, so this wasn't configured
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Puppet agent sometimes starts a run in production environment
+
+* ENC tells the agent the correct environment
+
+* puppet agent starts again
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* The behaviour for determining the correct environment changed a bit in past years
+
+* Agent tries to remember the past environment and reuse that for the next run
+
+* during an agent upgrade, the state can get lost
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Puppet agent sometimes starts a run in production environment
+
+* ENC tells the agent the correct environment
+
+* puppet agent starts again
+
+```puppet
+ini_setting { 'puppet.conf environment':
+  ensure  => 'present',
+  path    => '/etc/puppetlabs/puppet/puppet.conf',
+  section => 'agent',
+  setting => 'environment',
+  value   => $env,
+}
+```
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* hundred ways available to set the environment
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Puppet agent sometimes starts a run in production environment
+
+* ENC tells the agent the correct environment
+
+* puppet agent starts again
+
+```puppet
+ini_setting { 'puppet.conf environment':
+  ensure  => 'present',
+  path    => '/etc/puppetlabs/puppet/puppet.conf',
+  section => 'agent',
+  setting => 'environment',
+  value   => $env,
+}
+```
+
+For properly managing Puppet:
+
+* [forge.puppet.com/puppetlabs/puppet_agent](https://forge.puppet.com/modules/puppetlabs/puppet_agent)
+
+  * By default ignores the puppet.conf on your PE Infra
+
+* [forge.puppet.com/theforeman/puppet](https://forge.puppet.com/modules/theforeman/puppet)
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* hundred ways available to set the environment
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+Is a service in a healthy state so we can upgrade PE?
+
+  * Just one Primary, no other PE infra nodes?
+
+  * All agents delivered a report in the last 30 minutes?
+
+  * No failed resources, no cached catalog, no skipped resources?
+
+  * Same puppet agent version everywhere?
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+Is a service in a healthy state so we can upgrade PE?
+
+  * Just one Primary, no other PE infra nodes?
+
+  * All agents delivered a report in the last 30 minutes?
+
+  * No failed resources, no cached catalog, no skipped resources?
+
+  * Same puppet agent version everywhere?
+
+* [puppetlabs/pe_status_check](http://forge.puppet.com/puppetlabs/pe_status_check) contains plans to get those information
+
+  * We contributed some of them
+
+  * In the past reviews were done in a week, now it takes months to get a response
+
+  * Unclear who's responsible
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Let us glue everything together!
+
+```puppet
+plan profiles::convert (
+  Peadm::SingleTargetSpec $primary_host,
+) {
+  run_plan('profiles::subplans::precheck', { 'primary_host' => $primary_host })
+
+  # peadm::convert does two more sanity checks:
+  #   - do we have the correct bolt version
+  #   - are all nodes reachable
+  run_plan('peadm::convert', { 'primary_host' => $primary_host, '_run_as' => 'root' })
+
+  # peadm::upgrade doesn't do a final puppet run without changed resources
+  # To have a clean report, we trigger a puppet run here
+  # we  run it twice, in case we've a raise condition with an already running puppet agent
+  $params = {'_run_as' => 'root', '_catch_errors' => true }
+  $result = run_task('peadm::puppet_runonce', $primary_host, $params)
+  # ok is true if the task was successful on all targets
+  unless $result.ok {
+    out::message("Final peadm::puppet_runonce failed with: ${result}")
+    out::message('Trying another puppet run')
+    run_task('peadm::puppet_runonce', $primary_host, '_run_as' => 'root')
+  }
+}
+```
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+Open Source plans we have:
+
+* `convert` - does all the healthchecks & prepare steps & `peadm::convert`
+
+* `upgrade` - accepts a PE version as parameter, does healthcheck and then upgrades
+
+* `convertandupgradeto2021` - convert & upgrade to latest PE 2021
+
+* `convertandupgradeto2023` - convert & upgrade to latest PE 2023
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+I Would love to show you them, but they don't fit properly on the screen, it's way too much code
+---
+
+count: false
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+Open Source plans we have:
+
+* `convert` - does all the healthchecks & prepare steps & `peadm::convert`
+
+* `upgrade` - accepts a PE version as parameter, does healthcheck and then upgrades
+
+* `convertandupgradeto2021` - convert & upgrade to latest PE 2021
+
+* `convertandupgradeto2023` - convert & upgrade to latest PE 2023
+
+* All of this is under GPL license at [github.com/bastelfreak/testcontrolrepo](https://github.com/bastelfreak/testcontrolrepo/tree/peadm/site/profiles/plans)
+
+* Contains lots of sanity checks, tested in many many different scenarios
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+.left-column[
+## PE
+### Setup
+### Constraints
+### Job
+### Upgrade?
+### Upgrade!
+### Deployment?
+### Preparation
+]
+
+.right-column[
+
+* Configure `https://github.com/bastelfreak/testcontrolrepo` as your control-repo
+
+* create an environment nodegroup for `peadm`, assign your primary to it
+
+* Assign the `profiles::cleanup` and `profiles::boltprojects` classes
+
+* run your puppet agent
+
+* to convert and Upgrade, take a look at the plans in `site/profiles/plans`
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+class: center, middle, inverse
+
+# Conclusion<br/><br/>
+
+???
+
+---
+
+.left-column[
+## Conclusion
+]
+
+.right-column[
+* Disclaimer: Perforce does not recommend this upgrade method
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## Conclusion
+]
+
+.right-column[
+* Disclaimer: Perforce does not recommend this upgrade method
+
+* You can do fully automated PE upgrades, without SSH access
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+---
+
+count: false
+
+.left-column[
+## Conclusion
+]
+
+.right-column[
+* Disclaimer: Perforce does not recommend this upgrade method
+
+* You can do fully automated PE upgrades, without SSH access
+
+* checkout [github.com/bastelfreak/testcontrolrepo](https://github.com/bastelfreak/testcontrolrepo/tree/peadm?tab=readme-ov-file#demo-controlrepo-for-peadm)
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* An upgrade in open source is easier, because we've proper packages
+
+* an upgrade in open source is also less complex becaue PE has more components and services
+
+* Working with PE management / Product owners was a challenge
+---
+
+count: false
+
+.left-column[
+## Conclusion
+]
+
+.right-column[
+* Disclaimer: Perforce does not recommend this upgrade method
+
+* You can do fully automated PE upgrades, without SSH access
+
+* checkout [github.com/bastelfreak/testcontrolrepo](https://github.com/bastelfreak/testcontrolrepo/tree/peadm?tab=readme-ov-file#demo-controlrepo-for-peadm)
+
+* Let me know if you are interested in a demo!
+
+* For feedback: `bastelfreak` on <a href="https://slack.puppet.com/">slack.puppet.com</a>/Libera.Chat IRC or [tim@bastelfreak.de](mailto:tim@bastelfreak.de)
+
+* This talk and previous ones: <a href='https://github.com/bastelfreak/talks'>github.com/bastelfreak/talks</a>
+
+### Thanks for your attention!
+
+]
+
+<a href='https://betadots.de' alt='company website betadots'><img src="logo-1181x1181.png" alt="drawing" style="position: fixed; bottom: 12px; left: 20px; width: 100px;"/></a>
+.footnote[[@bastelsblog](https://twitter.com/bastelsblog) for [@voxpupuliorg](https://twitter.com/voxpupuliorg)]
+
+???
+
+* how to deploy code
+* different preparation steps
+* cleanup node groups / pe.conf
+* ensure PEADM uses correct node group
+* the issue with the installer URL
+* stderr redirection https://github.com/puppetlabs/puppetlabs-peadm/pull/523
+* duplicated tasks for running puppet agent
+* duplicated fact detection https://github.com/puppetlabs/puppetlabs-peadm/pull/459
+* puppetlabs/node_manager doesn't allow uppercase environment names
+
+
+    </textarea>
+    <script src="remark-latest.min.js"></script>
+    <script>
+      var slideshow = remark.create({
+        // Set the slideshow display ratio
+        // Default: '4:3'
+        // Alternatives: '16:9', ...
+        ratio: "16:9",
+        highlightStyle: "github"
+      });
+    </script>
+  </body>
+</html>
