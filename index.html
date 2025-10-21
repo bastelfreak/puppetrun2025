@@ -281,6 +281,8 @@ class: center, middle, inverse
 
 * Senior IT Automation Consultant at [betadots](https://betadots.de/)
 
+* Certified Puppet Solution Consultant
+
 [![company-logo](logo-1181x1181.png)](https://www.betadots.de)
 [![conference-logo-slides](puppet-run.jpg)](https://puppet.run)
 [![conference-logo-slides](puppet-run.jpg)](https://puppet.run)
@@ -401,6 +403,7 @@ git branch -m "$PT_control_repo_branch" production
 * Plans apply puppet code, execute Bolt or Puppet functions, start tasks or other plans
 
 ```puppet
+# @summary Conference Demo plan
 # @param message the string we want to paste to STDOUT
 plan test::foo (
   String[1] $message = 'Hi Puppet.Run 2025!',
@@ -434,6 +437,7 @@ class: center, middle, inverseold
 
 * bolt has more features, please check them out
 * but this isn't a bolt talk, just an intro
+* people comparing ansible with puppet are doing it wrong. The counterpart of ansible is bolt, not puppet
 ---
 class: center, middle, inverse
 
@@ -571,7 +575,7 @@ count: false
 .right-column[
 * An organisation with many regulations and restrictions
 
-* Runs 3000 different services
+* Runs 3000+ different services
 
 Each service:
 
@@ -595,7 +599,7 @@ count: false
 .right-column[
 * An organisation with many regulations and restrictions
 
-* Runs 3000 different services
+* Runs 3000+ different services
 
 Each service:
 
@@ -623,7 +627,7 @@ count: false
 .right-column[
 * An organisation with many regulations and restrictions
 
-* Runs 3000 different services
+* Runs 3000+ different services
 
 Each service:
 
@@ -665,15 +669,15 @@ Each service:
 
 .right-column[
 
-* 1 central GitLab
+* Central GitLab ([with geonodes](https://docs.gitlab.com/administration/geo/replication/multiple_servers/))
 
   * contains all puppet modules
 
-  * contains 3000 control repos
+  * contains 3000+ control repos
 
-* 3000 individual primaries
+* 3000+ individual primaries
 
-* 5-40 agents per primary
+* 5-200 agents per primary
 
 ]
 
@@ -815,7 +819,7 @@ count: false
 
 .right-column[
 
-* Update 3000 PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
+* Update 3000+ PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
 ]
 
 [![company-logo](logo-1181x1181.png)](https://www.betadots.de)
@@ -837,7 +841,7 @@ count: false
 
 .right-column[
 
-* Update 3000 PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
+* Update 3000+ PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
 
 * Don't use ssh
 
@@ -861,7 +865,7 @@ count: false
 
 .right-column[
 
-* Update 3000 PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
+* Update 3000+ PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
 
 * Don't use ssh
 
@@ -887,7 +891,7 @@ count: false
 
 .right-column[
 
-* Update 3000 PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
+* Update 3000+ PE 2019 (Puppet 6) & PE 2021 (Puppet 7) services to PE 2023 (Puppet 8)
 
 * Don't use ssh
 
@@ -901,99 +905,6 @@ count: false
 
 ???
 
----
-
-.left-column[
-## PE
-### Setup
-### Constraints
-### Job
-]
-
-.right-column[
-
-* I mentioned this to Perforce employees
-]
-
-[![company-logo](logo-1181x1181.png)](https://www.betadots.de)
-[![conference-logo-slides](puppet-run.jpg)](https://puppet.run)
-
-???
-
-* We had a discussion in the public slack and were brainstorming a bit
-* IRC and slack channels are always great to exchange ideas and discuss issues
----
-
-count: false
-
-.left-column[
-## PE
-### Setup
-### Constraints
-### Job
-]
-
-.right-column[
-
-* I mentioned this to Perforce employees
-
-* Perforce reached out to me for a collaboration
-
-The idea:
-
-* I implement the upgrade somehow
-
-* Perforce assists, helps to review PRs quickly
-
-* Perforce can publish a whitepaper
-
-* We publish the code as open source
-]
-
-[![company-logo](logo-1181x1181.png)](https://www.betadots.de)
-[![conference-logo-slides](puppet-run.jpg)](https://puppet.run)
-
-???
-
----
-
-count: false
-
-.left-column[
-## PE
-### Setup
-### Constraints
-### Job
-]
-
-.right-column[
-
-* I mentioned this to Perforce employees
-
-* Perforce reached out to me for a collaboration
-
-The idea:
-
-* I implement the upgrade somehow
-
-* Perforce assists, helps to review PRs quickly
-
-* Perforce can publish a whitepaper
-
-* We publish the code as open source
-
-* Perforce stopped responding to all emails
-
-]
-
-[![company-logo](logo-1181x1181.png)](https://www.betadots.de)
-[![conference-logo-slides](puppet-run.jpg)](https://puppet.run)
-
-???
-
-* I asked a lot of people, multiple times, no responsive
-
-* I don't know why
 ---
 
 .left-column[
@@ -1239,6 +1150,8 @@ count: false
 * License prohibits putting the rpms on my local mirror
 
 * With the rpms, the upgrade would be so much easier to automate
+
+* Perforce offered their open source packages as yum repos, but not Puppet Enterprise :sadface:
 ]
 
 [![company-logo](logo-1181x1181.png)](https://www.betadots.de)
@@ -1249,6 +1162,10 @@ count: false
 * We could have developed a generic plan that does OS patches and include the PE rpms
 
 * Perforce management is so reluctant and stubborn
+
+* The PE installer is very good for people that have no idea what they are doing and administering PE as a side project
+
+* But should those people even be in charge
 
 ---
 .left-column[
@@ -1296,6 +1213,7 @@ count: false
 
 ???
 
+* And you ask yourself, with what kind of witchcraft does PEADM install Puppet enterprise?
 ---
 
 count: false
@@ -1551,7 +1469,7 @@ count: false
 
   * Then systemd will run bolt in the background (asynchronously)
 
-```
+```ini
 # /etc/systemd/system/peadmmig@.service
 # THIS FILE IS MANAGED BY PUPPET
 [Unit]
@@ -2058,6 +1976,8 @@ count: false
 * PE Console can also serve Hiera data
 
 * A cronjob dumps PE Console data to disk (user_data.conf)
+
+  * [The job causes idempotency issues](https://github.com/puppetlabs/puppet-enterprise_issues/issues/42)
 ]
 
 [![company-logo](logo-1181x1181.png)](https://www.betadots.de)
@@ -2097,6 +2017,8 @@ count: false
 
 * A cronjob dumps PE Console data to disk (user_data.conf)
 
+  * [The job causes idempotency issues](https://github.com/puppetlabs/puppet-enterprise_issues/issues/42)
+
 * pe.conf and user_data.conf use HOCON format
 ]
 
@@ -2131,6 +2053,8 @@ count: false
 * PE Console can also serve Hiera data
 
 * A cronjob dumps PE Console data to disk (user_data.conf)
+
+  * [The job causes idempotency issues](https://github.com/puppetlabs/puppet-enterprise_issues/issues/42)
 
 * pe.conf and user_data.conf use HOCON format
 
